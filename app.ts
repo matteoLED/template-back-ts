@@ -1,22 +1,39 @@
-require("dotenv").config();
+import express, { json } from "express";
 
-import express, { Response, Request } from "express";
-import cors from "cors";
 
-const PORT = process.env.PORT || 3000;
+// Create the Express application
+const app = express();
 
-const api = express();
-api.use(express.json());
-api.use(cors());
+// Define a setup function to initialize your application
+async function setup() {
+  try {
+    // Dynamically import the configuration to ensure errors can be caught
 
-const ads = [{ Message: `Api is running on Port: ${PORT}` }];
+    const config = await import("./config/");
 
-api.get("/", (req: Request, res: Response) => {
-  res.json(ads);
-});
+    if (config === undefined) {
+      console.error("Failed to configure the API");
+      process.exit(1); // Exit with a failure code
+    }
 
-api.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    const port = config.default?.port;
 
-module.exports = api;
+    app.use(json());
+
+
+    // Configure routes
+    const ads = [{ Message: `Template api is running on Port: ${port}` }];
+    app.get("/", (req, res) => {
+      res.send(ads);
+    });
+
+    // Return the configured port along with the app for external handling
+    return { app, port };
+  } catch (error) {
+    console.error("Failed to configure the API:", error);
+    process.exit(1); // Exit with a failure code
+  }
+}
+
+// Export both app and setup for external use
+export { app, setup };

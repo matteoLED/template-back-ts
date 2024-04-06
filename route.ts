@@ -1,3 +1,9 @@
-import { Express } from "express";
+import { Request, Response, Express } from "express";
 
-module.exports = (app: Express) => {};
+
+import  testRoute  from "./router/test.route";
+
+
+export default function setupRoutes(app: Express) {
+  app.use("/", testRoute);
+}
